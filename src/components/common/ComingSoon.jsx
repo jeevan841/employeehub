@@ -1,0 +1,1 @@
+export default function ComingSoon({ title='Coming Soon' }) { return <div className="coming-soon"><div className="coming-icon">✦</div><h2>{title} is coming soon</h2><p>This area is reserved for the next EmployeeHub milestone.</p></div>; }

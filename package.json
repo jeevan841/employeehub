@@ -1,0 +1,9 @@
+{
+  "name": "employeehub",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {"dev": "vite", "start": "vite", "build": "vite build", "preview": "vite preview"},
+  "dependencies": {"@vitejs/plugin-react": "^4.3.4", "react": "^18.3.1", "react-dom": "^18.3.1", "react-router-dom": "^6.28.0", "sweetalert2": "^11.14.5", "vite": "^5.4.10"},
+  "devDependencies": {}
+}

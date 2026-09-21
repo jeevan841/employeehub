@@ -1,0 +1,1 @@
+export default function Badge({ status }) { const tone = status === 'Active' ? 'success' : status === 'On Leave' ? 'warning' : 'neutral'; return <span className={`badge badge-${tone}`}><i />{status}</span>; }
