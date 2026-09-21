@@ -1,4 +1,65 @@
-import { NavLink, Outlet } from 'react-router-dom';
-const links = [{label:'Dashboard',to:'/dashboard'},{label:'Employees',to:'/employees'},{label:'Organization',to:'/organization'}];
-const future = ['Attendance','Leave','Goals','Recognition','Learning','Analytics','Settings'];
-export default function AppLayout() { return <div className="app-shell"><aside className="sidebar"><div className="brand"><span className="brand-mark">E</span><span>EmployeeHub</span></div><nav>{links.map(link => <NavLink key={link.to} to={link.to} className={({isActive}) => isActive ? 'nav-link active' : 'nav-link'}>{link.label}</NavLink>)}{future.map(item => <span key={item} className="nav-link disabled">{item}<small>Soon</small></span>)}</nav></aside><main className="main-content"><header className="topbar"><div><p className="eyebrow">HR workspace</p><h1>People operations, simplified.</h1></div><div className="topbar-user">HR Admin</div></header><section className="page-content"><Outlet /></section></main></div>; }
+import { useMemo } from 'react';
+import { useEmployees } from '../../context/EmployeeContext';
+import { leaveRequests } from '../../data/leaveRequests';
+import Card from '../../components/common/Card';
+
+export default function Leave() {
+  const { employees } = useEmployees();
+  const employeeMap = new Map(employees.map(employee => [employee.id, employee]));
+  const summary = useMemo(() => {
+    const pending = leaveRequests.filter(item => item.status === 'Pending').length;
+    const approved = leaveRequests.filter(item => item.status === 'Approved').length;
+    const rejected = leaveRequests.filter(item => item.status === 'Rejected').length;
+    return { pending, approved, rejected };
+  }, []);
+
+  return (
+    <div>
+      <div className="page-title">
+        <div>
+          <p className="eyebrow">Leave</p>
+          <h2>Leave management</h2>
+          <p className="muted">Review leave trends, requests, and approvals.</p>
+        </div>
+      </div>
+
+      <div className="stats-grid">
+        {[['Pending', summary.pending], ['Approved', summary.approved], ['Rejected', summary.rejected], ['Total requests', leaveRequests.length]].map(([label, value]) => (
+          <Card key={label}><p className="stat-label">{label}</p><strong className="stat-value">{value}</strong></Card>
+        ))}
+      </div>
+
+      <Card title="Recent leave requests">
+        <div className="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Type</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Reason</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {leaveRequests.map(request => {
+                const employee = employeeMap.get(request.employeeId);
+                return (
+                  <tr key={request.id}>
+                    <td>{employee ? `${employee.firstName} ${employee.lastName}` : 'Unknown employee'}</td>
+                    <td>{request.type}</td>
+                    <td>{request.startDate}</td>
+                    <td>{request.endDate}</td>
+                    <td>{request.reason}</td>
+                    <td><span className={`badge ${request.status === 'Approved' ? 'badge-success' : request.status === 'Pending' ? 'badge-warning' : 'badge-neutral'}`}><i />{request.status}</span></td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
+  );
+}

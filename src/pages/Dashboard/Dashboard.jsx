@@ -1,6 +1,64 @@
-import { Link } from 'react-router-dom';
+import { useMemo } from 'react';
 import { useEmployees } from '../../context/EmployeeContext';
+import { leaveRequests } from '../../data/leaveRequests';
 import Card from '../../components/common/Card';
-import Badge from '../../components/common/Badge';
-import Avatar from '../../components/common/Avatar';
-export default function Dashboard() { const { employees } = useEmployees(); const active = employees.filter(e=>e.status==='Active').length; const leave = employees.filter(e=>e.status==='On Leave').length; const departments = new Set(employees.map(e=>e.department)).size; const recent = [...employees].sort((a,b)=>b.joiningDate.localeCompare(a.joiningDate)).slice(0,5); return <div><div className="page-title"><div><p className="eyebrow">Overview</p><h2>Good morning, HR Admin</h2><p className="muted">A quick view of your organization today.</p></div></div><div className="stats-grid">{[['Total employees',employees.length,'people'],['Active employees',active,'currently active'],['On leave',leave,'planned absence'],['Departments',departments,'functional groups']].map(([label,value,detail])=><Card key={label}><p className="stat-label">{label}</p><strong className="stat-value">{value}</strong><p className="muted">{detail}</p></Card>)}</div><div className="dashboard-grid"><Card title="Recent employees"><div className="employee-list">{recent.map(e=><Link className="employee-list-row" to={`/employees/${e.id}`} key={e.id}><Avatar firstName={e.firstName} lastName={e.lastName} size="small"/><span><strong>{e.firstName} {e.lastName}</strong><small>{e.designation}</small></span><Badge status={e.status}/></Link>)}</div></Card><Card title="Quick actions"><div className="quick-actions"><Link className="button primary" to="/employees">View employees</Link><Link className="button secondary" to="/organization">View organization</Link><button className="button secondary" disabled>Attendance · Soon</button><button className="button secondary" disabled>Leave requests · Soon</button></div></Card></div></div>; }
+
+export default function Leave() {
+  const { employees } = useEmployees();
+  const employeeById = new Map(employees.map(employee => [employee.id, employee]));
+  const summary = useMemo(() => ({
+    pending: leaveRequests.filter(item => item.status === 'Pending').length,
+    approved: leaveRequests.filter(item => item.status === 'Approved').length,
+    rejected: leaveRequests.filter(item => item.status === 'Rejected').length,
+  }), []);
+
+  return (
+    <div>
+      <div className="page-title">
+        <div>
+          <p className="eyebrow">Leave</p>
+          <h2>Leave management</h2>
+          <p className="muted">Review requests and team availability.</p>
+        </div>
+      </div>
+
+      <div className="stats-grid">
+        {[['Pending', summary.pending], ['Approved', summary.approved], ['Rejected', summary.rejected], ['Total requests', leaveRequests.length]].map(([label, value]) => (
+          <Card key={label}><p className="stat-label">{label}</p><strong className="stat-value">{value}</strong></Card>
+        ))}
+      </div>
+
+      <Card title="Recent leave requests">
+        <div className="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Type</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Reason</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {leaveRequests.map(request => {
+                const employee = employeeById.get(request.employeeId);
+                return (
+                  <tr key={request.id}>
+                    <td>{employee ? `${employee.firstName} ${employee.lastName}` : 'Unknown employee'}</td>
+                    <td>{request.type}</td>
+                    <td>{request.startDate}</td>
+                    <td>{request.endDate}</td>
+                    <td>{request.reason}</td>
+                    <td><span className={`badge ${request.status === 'Approved' ? 'badge-success' : request.status === 'Pending' ? 'badge-warning' : 'badge-neutral'}`}><i />{request.status}</span></td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
+  );
+}
