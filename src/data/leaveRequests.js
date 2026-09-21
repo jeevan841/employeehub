@@ -5,3 +5,5 @@ export const leaveRequests = [
   { id: 'LV-104', employeeId: 'EMP-1001', type: 'Work from Home', startDate: '2026-09-23', endDate: '2026-09-23', reason: 'Deep focus day', status: 'Pending' },
   { id: 'LV-105', employeeId: 'EMP-1007', type: 'Medical Leave', startDate: '2026-09-19', endDate: '2026-09-20', reason: 'Recovery', status: 'Rejected' }
 ];
+
+export default leaveRequests;
